@@ -2,7 +2,7 @@
   "name": "godumplingserver",
   "version": "1.0.0",
   "description": "socket.io server for godumpling game",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "test"
   },
@@ -23,5 +23,8 @@
   "homepage": "https://github.com/wrightomated/goDumplingServer#readme",
   "dependencies": {
     "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.3"
   }
 }
