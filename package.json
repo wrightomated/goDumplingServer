@@ -1,0 +1,27 @@
+{
+  "name": "godumplingserver",
+  "version": "1.0.0",
+  "description": "socket.io server for godumpling game",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wrightomated/goDumplingServer.git"
+  },
+  "keywords": [
+    "socket.io",
+    "godumpling",
+    "game"
+  ],
+  "author": "James Wright",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wrightomated/goDumplingServer/issues"
+  },
+  "homepage": "https://github.com/wrightomated/goDumplingServer#readme",
+  "dependencies": {
+    "socket.io": "^2.3.0"
+  }
+}
