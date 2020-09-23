@@ -2,7 +2,7 @@
   "name": "godumplingserver",
   "version": "1.0.0",
   "description": "socket.io server for godumpling game",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "scripts": {
     "test": "test"
   },
