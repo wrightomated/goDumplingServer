@@ -1,5 +1,5 @@
-class Card {
+export class Card {
   type: CardType;
 }
 
-type CardType = "champagne" | "beam";
+type CardType = "champagne" | "birthday";
