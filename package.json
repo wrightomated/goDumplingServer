@@ -4,7 +4,7 @@
   "description": "socket.io server for godumpling game",
   "main": "src/index.ts",
   "scripts": {
-    "test": "test"
+    "dev": "ts-node-dev ./src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -25,8 +25,9 @@
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
-    "typescript": "^4.0.3",
     "@types/node": "^14.11.2",
-    "@types/socket.io": "^2.1.11"
+    "@types/socket.io": "^2.1.11",
+    "ts-node-dev": "^1.0.0-pre.63",
+    "typescript": "^4.0.3"
   }
 }

@@ -1,4 +1,4 @@
-import { Card, CardType } from "../model/card";
+import { Card } from "../model/card";
 import { Deck } from "../model/deck";
 import { DeckStructure } from "../model/deckStructure";
 import { NumberOfPlayers } from "../model/player";
@@ -26,6 +26,7 @@ export class DeckService {
   };
 
   private playerToCardMap: Map<NumberOfPlayers, number> = new Map()
+    .set(2, 10)
     .set(3, 9)
     .set(4, 8)
     .set(5, 7);
@@ -38,7 +39,19 @@ export class DeckService {
     return [].concat.apply([], arrays);
   }
 
-  dealCards(deck: Deck, players: NumberOfPlayers) {}
+  dealCards(deck: Deck, players: NumberOfPlayers): Card[][] {
+    const cardsPerPlayer = this.playerToCardMap.get(players);
+    let hands: Card[][] = new Array(players)
+      .fill(false)
+      .map(() => new Array(cardsPerPlayer).fill(false));
+
+    for (let card = 0; card < cardsPerPlayer; card++) {
+      for (let playerId = 0; playerId < players; playerId++) {
+        hands[playerId][card] = deck.pop();
+      }
+    }
+    return hands;
+  }
 
   shuffleArray(array: any[]) {
     for (var i = array.length - 1; i > 0; i--) {

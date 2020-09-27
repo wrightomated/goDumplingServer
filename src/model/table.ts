@@ -1,6 +1,6 @@
 import { NumberOfPlayers } from "./player";
 
 export class Table {
-  playerRows: NumberOfPlayers;
+  playerRows: [];
   deckSize: number;
 }

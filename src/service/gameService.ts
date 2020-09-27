@@ -1,9 +1,63 @@
 import { Game } from "../model/game";
-import { NumberOfPlayers } from "../model/player";
+import { NumberOfPlayers, Player } from "../model/player";
+import { DeckService } from "./deckService";
 
-class GameService {
-  gameState: Game;
-  constructor(numberOfPlayers: NumberOfPlayers) {}
+export class GameService {
+  gameState: Game = new Game();
+  deckService: DeckService = new DeckService();
+  numberOfPlayers: number = 0;
+  socketIds: string[] = [];
 
-  init() {}
+  addPlayer(socketId: string) {
+    this.socketIds[this.numberOfPlayers] = socketId;
+    this.numberOfPlayers++;
+  }
+
+  init() {
+    this.gameState.deck = this.deckService.createDeck();
+    this.gameState.round = 0;
+    this.gameState.players = [...Array(this.numberOfPlayers)].map(
+      (_, i) => new Player(i, this.socketIds[i])
+    );
+  }
+
+  nextRound() {
+    if (this.gameState.round === 3) {
+      //endgame
+    }
+    this.gameState.deck = this.deckService.shuffleArray(this.gameState.deck);
+    this.gameState.round++;
+    this.gameState.roundTurn = 1;
+    let hands = this.deckService.dealCards(
+      this.gameState.deck,
+      this.gameState.players.length as NumberOfPlayers
+    );
+    this.gameState.players.forEach((p) => {
+      p.hand = hands[p.id];
+    });
+    // console.log(JSON.stringify(this.gameState, null, 2));
+  }
+
+  nextTurn() {
+    const heldHand = [...this.gameState.players[0].hand];
+    this.gameState.players.forEach((p, i, a) => {
+      p.playSpace.push(p.offeredCard);
+      p.offeredCard = undefined;
+      p.playedThisTurn = false;
+      p.hand = p.id < a.length - 1 ? [...a[i + 1].hand] : heldHand;
+    });
+  }
+
+  offerCard(player: Player, cardId: number) {
+    if (player.playedThisTurn) {
+      return;
+    }
+    const card = player.hand.find((c) => c.id === cardId);
+    if (!card) {
+      console.log("bad");
+    }
+    player.hand = player.hand.filter((card) => card.id !== cardId);
+    player.offeredCard = card;
+    player.playedThisTurn = true;
+  }
 }
