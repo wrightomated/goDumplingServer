@@ -55,7 +55,7 @@ function questionStartGame() {
 
 function tickCountdown() {
   countDown = true;
-  if (timeleft > 0) {
+  if (timeleft >= 0) {
     setTimeout(() => {
       console.log("tick");
       server.sockets.emit("countdown", timeleft--);

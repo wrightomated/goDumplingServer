@@ -1,3 +1,4 @@
+import { Card } from "../model/card";
 import { Game } from "../model/game";
 import { NumberOfPlayers, Player } from "../model/player";
 import { DeckService } from "./deckService";
@@ -39,12 +40,17 @@ export class GameService {
   }
 
   nextTurn() {
-    const heldHand = [...this.gameState.players[0].hand];
+    const heldHand = [...this.gameState.players[0].hand].filter(
+      (c) => !c.offered
+    );
     this.gameState.players.forEach((p, i, a) => {
       p.playSpace.push(p.offeredCard);
       p.offeredCard = undefined;
       p.playedThisTurn = false;
-      p.hand = p.id < a.length - 1 ? [...a[i + 1].hand] : heldHand;
+      p.hand =
+        p.id < a.length - 1
+          ? [...a[i + 1].hand].filter((c) => !c.offered)
+          : heldHand;
     });
   }
 
@@ -55,8 +61,15 @@ export class GameService {
     const card = player.hand.find((c) => c.id === cardId);
     if (!card) {
       console.log("bad");
+      return;
     }
-    player.hand = player.hand.filter((card) => card.id !== cardId);
+    // player.hand = player.hand.filter((card) => card.id !== cardId);
+    player.hand = player.hand.map((card: Card) => {
+      if (card.id !== cardId) {
+        return card;
+      }
+      return { ...card, offered: true };
+    });
     player.offeredCard = card;
     player.playedThisTurn = true;
   }
