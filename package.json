@@ -4,7 +4,8 @@
   "description": "socket.io server for godumpling game",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "ts-node-dev ./src/index.ts"
+    "dev": "ts-node-dev ./src/index.ts",
+    "build": "tsc ./src/index.ts"
   },
   "repository": {
     "type": "git",
