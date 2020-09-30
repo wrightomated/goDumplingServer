@@ -1,17 +1,18 @@
 import { Card } from "./card";
+import { PlayerConnection } from "./playerConnection";
 
 export class Player {
   id: number;
-  socketId: string;
+  playerConnection: PlayerConnection;
   totalScore: number = 0;
   playedThisTurn: boolean = false;
-  offeredCard: Card;
+  playerReady: boolean = false;
   hand: Card[];
   playSpace: Card[] = [];
 
-  constructor(id: number, socketId: string) {
+  constructor(id: number, playerConnection: PlayerConnection) {
     this.id = id;
-    this.socketId = socketId;
+    this.playerConnection = playerConnection;
   }
 }
 

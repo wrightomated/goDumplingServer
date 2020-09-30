@@ -11,19 +11,18 @@ let timeleft = 2;
 
 // middleware
 server.use((socket, next) => {
-  let token = socket.handshake.query.token;
-  console.log(token);
-  if (true) {
+  let insecureToken: string = socket.handshake.query.token;
+  if (gameService.addPlayer(socket.id, insecureToken)) {
     return next();
   }
-  return next(new Error("authentication error"));
+  return next(new Error("Error adding player"));
 });
 
 server.on("connection", (socket) => {
   socket.emit("welcome", socket.id);
   socket.on("cardSelected", (cardId) => {
     const player = gameService.gameState.players.find(
-      (x) => x.socketId === socket.id
+      (x) => x.playerConnection.socketId === socket.id
     );
     gameService.offerCard(player, cardId);
     socket.emit("updateHand", player.hand);
@@ -35,12 +34,9 @@ server.on("connection", (socket) => {
   });
   socket.on("ready", () => {
     console.log(`${socket.id} is ready`);
-    gameService.addPlayer(socket.id);
+
     server.sockets.emit("playersReady", gameService.numberOfPlayers);
     questionStartGame();
-    // gameService.init(2);
-    // gameService.nextRound();
-    // socket.emit("updateHand", gameService.gameState.players[0].hand);
   });
 });
 
@@ -76,7 +72,7 @@ function startGame() {
 function updateHands() {
   gameService.gameState.players.forEach((x, i) => {
     server
-      .to(x.socketId)
+      .to(x.playerConnection.socketId)
       .emit("updateHand", gameService.gameState.players[i].hand);
   });
 }

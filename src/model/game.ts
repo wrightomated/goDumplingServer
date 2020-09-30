@@ -6,6 +6,7 @@ export class Game {
   round: GameRound;
   roundTurn: number;
   deck: Deck;
+  discardPile: Deck;
   players: Player[];
   gameTable: Table;
 }

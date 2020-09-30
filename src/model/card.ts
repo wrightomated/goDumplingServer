@@ -16,3 +16,9 @@ export type CardType =
   | "greens"
   | "puddin"
   | "beam";
+
+export const cardToScore: Map<CardType, number> = new Map()
+  .set("champagne", 2)
+  .set("birthday", 10)
+  .set("pork", 1)
+  .set("beef", 2);
