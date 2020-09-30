@@ -7,16 +7,25 @@ import { DeckService } from "./deckService";
 export class GameService {
   gameState: Game = new Game();
   deckService: DeckService = new DeckService();
-  numberOfPlayers: number = 0;
   socketIds: string[] = [];
   playerConnections: PlayerConnection[] = [];
 
+  public get numberOfPlayers(): number {
+    return this.gameState.players.length;
+  }
+
+  public get numberOfReadyPlayers(): number {
+    return this.gameState.players.filter((p) => p.playerReady).length;
+  }
+
   addPlayer(socketId: string, insecureToken: string): boolean {
-    const socketInUse = this.playerConnections.filter(
-      (x) => x.socketId === socketId
+    const socketInUse = this.gameState?.players.find(
+      (p) => p.playerConnection.socketId === socketId
     );
+
     // I can't imagine this happening.
     if (socketInUse) {
+      console.log("socketInUse");
       return false;
     }
 
@@ -36,8 +45,13 @@ export class GameService {
           playerIndex
         ].playerConnection = playerConnection);
 
-    this.numberOfPlayers = this.playerConnections.length;
     return true;
+  }
+
+  playerBySocketId(socketId: string): Player {
+    return this.gameState.players.find(
+      (p) => p.playerConnection.socketId === socketId
+    );
   }
 
   init() {
@@ -88,9 +102,6 @@ export class GameService {
   }
 
   offerCard(player: Player, cardId: number) {
-    // if (player.playedThisTurn) {
-    //   return;
-    // }
     const card = player.hand.find((c) => c.id === cardId);
     if (!card) {
       console.log("bad");
@@ -98,10 +109,7 @@ export class GameService {
     }
 
     player.hand = player.hand.map((card: Card) => {
-      if (card.id !== cardId) {
-        return card;
-      }
-      return { ...card, offered: true };
+      return { ...card, offered: card.id !== cardId ? false : true };
     });
     player.playedThisTurn = true;
   }
@@ -115,5 +123,11 @@ export class GameService {
           .map((c) => cardToScore.get(c.type))
           .reduce(reducer, p.totalScore))
     );
+  }
+
+  playerReady(socketId: string, name: string) {
+    const player = this.playerBySocketId(socketId);
+    player.playerReady = true;
+    player.name = name ?? `Player ${player.id}`;
   }
 }

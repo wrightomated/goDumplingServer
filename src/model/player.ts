@@ -9,6 +9,7 @@ export class Player {
   playerReady: boolean = false;
   hand: Card[];
   playSpace: Card[] = [];
+  name: string;
 
   constructor(id: number, playerConnection: PlayerConnection) {
     this.id = id;

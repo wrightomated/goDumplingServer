@@ -1,18 +1,19 @@
-import { timeStamp } from "console";
-// import io = require("socket.io");
 import * as io from "socket.io";
-import { DeckService } from "./service/deckService";
+import { Table } from "./model/table";
 import { GameService } from "./service/gameService";
 const server = io.listen(3000);
-const deck: DeckService = new DeckService();
 const gameService: GameService = new GameService();
-let countDown: boolean = false;
+let countDownStarted: boolean = false;
 let timeleft = 2;
+let numberOfPlayersNeeded = 2;
 
 // middleware
 server.use((socket, next) => {
   let insecureToken: string = socket.handshake.query.token;
-  if (gameService.addPlayer(socket.id, insecureToken)) {
+  console.log("connection");
+  const playerConnected = gameService.addPlayer(socket.id, insecureToken);
+  if (playerConnected) {
+    console.log(`Added ${insecureToken} on socket ${socket.id}`);
     return next();
   }
   return next(new Error("Error adding player"));
@@ -29,28 +30,27 @@ server.on("connection", (socket) => {
     if (gameService.gameState.players.every((p) => p.playedThisTurn)) {
       gameService.nextTurn();
       updateHands();
-      updatePlayArea();
+      updateTable();
     }
   });
-  socket.on("ready", () => {
-    console.log(`${socket.id} is ready`);
-
-    server.sockets.emit("playersReady", gameService.numberOfPlayers);
-    questionStartGame();
+  socket.on("ready", (playerName: string) => {
+    gameService.playerReady(socket.id, playerName);
+    server.sockets.emit("playersReady", gameService.numberOfReadyPlayers);
+    attemptToStartGame();
   });
 });
 
-function questionStartGame() {
-  if (countDown) {
+function attemptToStartGame() {
+  if (countDownStarted) {
     return;
   }
-  if (gameService.numberOfPlayers > 1) {
+  if (gameService.numberOfReadyPlayers >= numberOfPlayersNeeded) {
     tickCountdown();
   }
 }
 
 function tickCountdown() {
-  countDown = true;
+  countDownStarted = true;
   if (timeleft >= 0) {
     setTimeout(() => {
       console.log("tick");
@@ -81,6 +81,10 @@ function updatePlayArea() {
   const playArea = gameService.gameState.players.map((p) => {
     return p.playSpace;
   });
-  console.log(playArea);
   server.sockets.emit("playArea", playArea);
+}
+
+function updateTable() {
+  const table = new Table(gameService.gameState);
+  server.sockets.emit("table", table);
 }

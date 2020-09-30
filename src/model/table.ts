@@ -1,6 +1,28 @@
-import { NumberOfPlayers } from "./player";
+import { Card } from "./card";
+import { Game } from "./game";
 
 export class Table {
-  playerRows: [];
+  players: PlayerOverview[];
+  round: number;
   deckSize: number;
+  discardSize: number;
+
+  constructor(gameState: Game) {
+    this.round = gameState.round;
+    this.deckSize = gameState.deck.length;
+    this.discardSize = gameState.discardPile.length;
+    this.players = gameState.players.map((p) => {
+      return {
+        playArea: p.playSpace,
+        playerName: p.name,
+        playerScore: p.totalScore,
+      };
+    });
+  }
+}
+
+export class PlayerOverview {
+  playArea: Card[];
+  playerName: string;
+  playerScore: number;
 }
