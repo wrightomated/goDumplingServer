@@ -10,6 +10,7 @@ export class Player {
   hand: Card[];
   playSpace: Card[] = [];
   name: string;
+  isPlaying: boolean = false;
 
   constructor(id: number, playerConnection: PlayerConnection) {
     this.id = id;

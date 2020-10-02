@@ -11,13 +11,15 @@ export class Table {
     this.round = gameState.round;
     this.deckSize = gameState.deck.length;
     this.discardSize = gameState.discardPile.length;
-    this.players = gameState.players.map((p) => {
-      return {
-        playArea: p.playSpace,
-        playerName: p.name,
-        playerScore: p.totalScore,
-      };
-    });
+    this.players = gameState.players
+      .filter((p) => p.isPlaying)
+      .map((p) => {
+        return {
+          playArea: p.playSpace,
+          playerName: p.name,
+          playerScore: p.totalScore,
+        };
+      });
   }
 }
 

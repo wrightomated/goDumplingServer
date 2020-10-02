@@ -2,6 +2,7 @@ import { Card, cardToScore } from "../model/card";
 import { Game } from "../model/game";
 import { NumberOfPlayers, Player } from "../model/player";
 import { PlayerConnection } from "../model/playerConnection";
+import { Table } from "../model/table";
 import { DeckService } from "./deckService";
 
 export class GameService {
@@ -14,38 +15,48 @@ export class GameService {
     return this.gameState.players.length;
   }
 
-  public get numberOfReadyPlayers(): number {
-    return this.gameState.players.filter((p) => p.playerReady).length;
+  public get readyPlayers(): Player[] {
+    return this.gameState.players.filter((p) => p.playerReady);
   }
 
-  addPlayer(socketId: string, insecureToken: string): boolean {
+  public get numberOfReadyPlayers(): number {
+    return this.readyPlayers.length;
+  }
+
+  public get playingPlayers(): Player[] {
+    return this.gameState.players.filter((p) => p.isPlaying);
+  }
+
+  public get currentTable(): Table {
+    return new Table(this.gameState);
+  }
+
+  playerInGame(socketId: string, insecureToken: string): number {
     const socketInUse = this.gameState?.players.find(
       (p) => p.playerConnection.socketId === socketId
     );
 
     // I can't imagine this happening.
     if (socketInUse) {
-      console.log("socketInUse");
-      return false;
+      console.error("socketInUse");
+      return;
     }
 
     const playerIndex = this.gameState.players.findIndex(
       (p) => p.playerConnection.insecureToken === insecureToken
     );
 
-    const playerConnection: PlayerConnection = {
-      socketId: socketId,
-      insecureToken: insecureToken,
-    };
-    playerIndex === -1
-      ? this.gameState.players.push(
-          new Player(this.numberOfPlayers, playerConnection)
-        )
-      : (this.gameState.players[
-          playerIndex
-        ].playerConnection = playerConnection);
+    return playerIndex;
+  }
 
-    return true;
+  updatePlayer(playerIndex: number, playerConnection: PlayerConnection): void {
+    this.gameState.players[playerIndex].playerConnection = playerConnection;
+  }
+
+  addPlayer(playerConnection: PlayerConnection) {
+    this.gameState.players.push(
+      new Player(this.numberOfPlayers, playerConnection)
+    );
   }
 
   playerBySocketId(socketId: string): Player {
@@ -57,6 +68,7 @@ export class GameService {
   init() {
     this.gameState.deck = this.deckService.createDeck();
     this.gameState.round = 0;
+    this.readyPlayers.forEach((p) => (p.isPlaying = true));
   }
 
   nextRound() {
@@ -69,23 +81,21 @@ export class GameService {
     this.gameState.round++;
     this.gameState.roundTurn = 1;
     this.gameState.discardPile = this.gameState.discardPile.concat(
-      this.gameState.players.flatMap((p) => p.playSpace)
+      this.playingPlayers.flatMap((p) => p.playSpace)
     );
     let hands = this.deckService.dealCards(
       this.gameState.deck,
-      this.gameState.players.length as NumberOfPlayers
+      this.playingPlayers.length as NumberOfPlayers
     );
-    this.gameState.players.forEach((p) => {
-      p.hand = hands[p.id];
+    this.playingPlayers.forEach((p, i) => {
+      p.hand = hands[i];
       p.playSpace = [];
     });
   }
 
   nextTurn() {
-    const heldHand = [...this.gameState.players[0].hand].filter(
-      (c) => !c.offered
-    );
-    this.gameState.players.forEach((p, i, a) => {
+    const heldHand = [...this.playingPlayers[0].hand].filter((c) => !c.offered);
+    this.playingPlayers.forEach((p, i, a) => {
       const offeredCard = p.hand.find((c) => c.offered);
       p.playSpace.push(offeredCard);
       // p.offeredCard = undefined;
@@ -95,7 +105,7 @@ export class GameService {
           ? [...a[i + 1].hand].filter((c) => !c.offered)
           : heldHand;
     });
-    if (this.gameState.players[0].hand.length === 0) {
+    if (this.playingPlayers[0].hand.length === 0) {
       this.score();
       this.nextRound();
     }
@@ -117,12 +127,12 @@ export class GameService {
   score() {
     const reducer = (accumulator: number, currentValue: number) =>
       accumulator + currentValue;
-    this.gameState.players.forEach(
-      (p) =>
-        (p.totalScore = p.hand
-          .map((c) => cardToScore.get(c.type))
-          .reduce(reducer, p.totalScore))
-    );
+    this.playingPlayers.forEach((p) => {
+      p.totalScore = p.playSpace
+        .map((c) => cardToScore.get(c.type))
+        .reduce(reducer, p.totalScore);
+      console.log(p.totalScore);
+    });
   }
 
   playerReady(socketId: string, name: string) {

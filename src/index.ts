@@ -1,4 +1,6 @@
 import * as io from "socket.io";
+import { Player } from "./model/player";
+import { PlayerConnection } from "./model/playerConnection";
 import { Table } from "./model/table";
 import { GameService } from "./service/gameService";
 const server = io.listen(3000);
@@ -11,12 +13,25 @@ let numberOfPlayersNeeded = 2;
 server.use((socket, next) => {
   let insecureToken: string = socket.handshake.query.token;
   console.log("connection");
-  const playerConnected = gameService.addPlayer(socket.id, insecureToken);
-  if (playerConnected) {
-    console.log(`Added ${insecureToken} on socket ${socket.id}`);
+  if (!insecureToken) {
+    return next(new Error("No token"));
+  }
+  const playerIndex = gameService.playerInGame(socket.id, insecureToken);
+  const playerConnection = new PlayerConnection(socket.id, insecureToken);
+
+  if (playerIndex >= 0) {
+    gameService.updatePlayer(playerIndex, playerConnection);
+    return next();
+  } else if (playerIndex === -1 && timeleft > 0) {
+    gameService.addPlayer(playerConnection);
     return next();
   }
-  return next(new Error("Error adding player"));
+
+  // if (playerConnected) {
+  //   console.log(`Added ${insecureToken} on socket ${socket.id}`);
+  //   return next();
+  // }
+  // return next(new Error("Error adding player"));
 });
 
 server.on("connection", (socket) => {
@@ -27,16 +42,33 @@ server.on("connection", (socket) => {
     );
     gameService.offerCard(player, cardId);
     socket.emit("updateHand", player.hand);
-    if (gameService.gameState.players.every((p) => p.playedThisTurn)) {
+    if (gameService.playingPlayers.every((p) => p.playedThisTurn)) {
       gameService.nextTurn();
       updateHands();
       updateTable();
     }
   });
   socket.on("ready", (playerName: string) => {
-    gameService.playerReady(socket.id, playerName);
-    server.sockets.emit("playersReady", gameService.numberOfReadyPlayers);
+    console.log("yahoo");
+    const player = gameService.playerBySocketId(socket.id);
+    if (timeleft < 0 && !player.playerReady) {
+      socket.emit("countdown", timeleft);
+      return;
+    }
+    if (player.playerReady) {
+      reconnectPlayer(player, socket.id);
+      server.sockets.emit("playersReady", gameService.numberOfReadyPlayers);
+    } else {
+      gameService.playerReady(socket.id, playerName);
+      server.sockets.emit("playersReady", gameService.numberOfReadyPlayers);
+    }
     attemptToStartGame();
+  });
+  socket.on("disconnect", (socket) => {
+    const player = gameService.playerBySocketId(socket.id);
+    if (player) {
+      player.playerConnection.connected = false;
+    }
   });
 });
 
@@ -70,21 +102,30 @@ function startGame() {
 }
 
 function updateHands() {
-  gameService.gameState.players.forEach((x, i) => {
+  gameService.playingPlayers.forEach((x, i) => {
     server
       .to(x.playerConnection.socketId)
-      .emit("updateHand", gameService.gameState.players[i].hand);
+      .emit("updateHand", gameService.playingPlayers[i].hand);
   });
 }
 
-function updatePlayArea() {
-  const playArea = gameService.gameState.players.map((p) => {
-    return p.playSpace;
-  });
-  server.sockets.emit("playArea", playArea);
-}
+// function updatePlayArea() {
+//   const playArea = gameService.playingPlayers.map((p) => {
+//     return p.playSpace;
+//   });
+//   server.sockets.emit("playArea", playArea);
+// }
 
 function updateTable() {
-  const table = new Table(gameService.gameState);
+  // const table = new Table(gameService.gameState);
+  const table = gameService.currentTable;
   server.sockets.emit("table", table);
+}
+
+function reconnectPlayer(player: Player, socketId: string) {
+  if (timeleft === -1) {
+    server.sockets.emit("countdown", timeleft);
+    server.to(socketId).emit("updateHand", player.hand);
+    server.to(socketId).emit("table", new Table(gameService.gameState));
+  }
 }
