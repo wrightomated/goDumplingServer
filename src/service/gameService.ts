@@ -4,10 +4,12 @@ import { NumberOfPlayers, Player } from "../model/player";
 import { PlayerConnection } from "../model/playerConnection";
 import { Table } from "../model/table";
 import { DeckService } from "./deckService";
+import { ScoringService } from "./scoringService";
 
 export class GameService {
   gameState: Game = new Game();
   deckService: DeckService = new DeckService();
+  scoringService: ScoringService = new ScoringService();
   socketIds: string[] = [];
   playerConnections: PlayerConnection[] = [];
 
@@ -126,6 +128,7 @@ export class GameService {
   }
 
   score() {
+    this.scoringService.score(this.playingPlayers);
     const reducer = (accumulator: number, currentValue: number) =>
       accumulator + currentValue;
     this.playingPlayers.forEach((p) => {
