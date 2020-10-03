@@ -12,7 +12,7 @@ let numberOfPlayersNeeded = 2;
 // middleware
 server.use((socket, next) => {
   let insecureToken: string = socket.handshake.query.token;
-  console.log("connection");
+  console.log("connection", insecureToken);
   if (!insecureToken) {
     return next(new Error("No token"));
   }

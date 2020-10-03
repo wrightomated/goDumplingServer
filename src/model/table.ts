@@ -31,7 +31,7 @@ export class Table {
         gameState.players
           .filter((p) => p.isPlaying)
           .sort((a, b) => {
-            return a.totalScore + b.totalScore;
+            return a.totalScore - b.totalScore;
           })[0].totalScore === score
       );
     }
