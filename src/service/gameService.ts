@@ -34,21 +34,27 @@ export class GameService {
   }
 
   playerInGame(socketId: string, insecureToken: string): number {
-    // const socketInUse = this.gameState.players.find(
-    //   (p) => p.playerConnection.socketId === socketId
-    // );
+    const socketInUse = this.gameState.players.find(
+      (p) => p.playerConnection.socketId === socketId
+    );
 
-    // // I can't imagine this happening.
-    // if (socketInUse) {
-    //   console.error("socketInUse");
-    //   return;
-    // }
+    // I can't imagine this happening.
+    if (socketInUse) {
+      console.error("socketInUse");
+      return;
+    }
 
     const playerIndex = this.gameState.players.findIndex(
       (p) => p.playerConnection.insecureToken === insecureToken
     );
 
     return playerIndex;
+  }
+
+  newGame() {
+    this.gameState.players.forEach((p) => {
+      p.reset();
+    });
   }
 
   updatePlayer(playerIndex: number, playerConnection: PlayerConnection): void {

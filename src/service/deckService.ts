@@ -52,7 +52,7 @@ export class DeckService {
   };
 
   private playerToCardMap: Map<NumberOfPlayers, number> = new Map()
-    .set(2, 10)
+    .set(2, 2)
     .set(3, 9)
     .set(4, 8)
     .set(5, 7);

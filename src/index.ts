@@ -6,8 +6,8 @@ import { GameService } from "./service/gameService";
 const server = io.listen(3000);
 const gameService: GameService = new GameService();
 let countDownStarted: boolean = false;
-let timeleft = 2;
-let numberOfPlayersNeeded = 2;
+let timeleft = 10;
+let numberOfPlayersNeeded = 5;
 
 // middleware
 server.use((socket, next) => {
@@ -26,12 +26,6 @@ server.use((socket, next) => {
     gameService.addPlayer(playerConnection);
     return next();
   }
-
-  // if (playerConnected) {
-  //   console.log(`Added ${insecureToken} on socket ${socket.id}`);
-  //   return next();
-  // }
-  // return next(new Error("Error adding player"));
 });
 
 server.on("connection", (socket) => {
@@ -46,6 +40,11 @@ server.on("connection", (socket) => {
       gameService.nextTurn();
       updateHands();
       updateTable();
+    }
+    if (gameService.gameState.gameEnded) {
+      setTimeout(() => {
+        gameService.newGame();
+      }, 30000);
     }
   });
   socket.on("ready", (playerName: string) => {

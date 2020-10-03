@@ -27,11 +27,19 @@ export class Table {
 
   private findWinner(gameState: Game, score: number) {
     if (gameState.gameEnded) {
+      console.log(
+        "coooool",
+        gameState.players
+          .filter((p) => p.isPlaying)
+          .sort((a, b) => {
+            return a.totalScore + b.totalScore;
+          })
+      );
       return (
         gameState.players
           .filter((p) => p.isPlaying)
           .sort((a, b) => {
-            return a.totalScore - b.totalScore;
+            return a.totalScore + b.totalScore;
           })[0].totalScore === score
       );
     }
