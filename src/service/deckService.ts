@@ -4,19 +4,21 @@ import { DeckStructure } from "../model/deckStructure";
 import { NumberOfPlayers } from "../model/player";
 
 export class DeckService {
+  //goal 107
   private deckStructure: DeckStructure = {
     cards: [
       {
+        // These will be added dynamically
         cardType: "birthday",
-        amount: 100,
+        amount: 0,
       },
       {
         cardType: "champagne",
-        amount: 100,
+        amount: 12,
       },
       {
         cardType: "pork",
-        amount: 15,
+        amount: 20,
       },
       {
         cardType: "beef",
@@ -26,11 +28,31 @@ export class DeckService {
         cardType: "prawn",
         amount: 15,
       },
+      {
+        cardType: "chilli",
+        amount: 10,
+      },
+      {
+        cardType: "bowl",
+        amount: 6,
+      },
+      {
+        cardType: "vinegar",
+        amount: 10,
+      },
+      {
+        cardType: "ice",
+        amount: 6,
+      },
+      {
+        cardType: "puddin",
+        amount: 15,
+      },
     ],
   };
 
   private playerToCardMap: Map<NumberOfPlayers, number> = new Map()
-    .set(2, 10)
+    .set(2, 3)
     .set(3, 9)
     .set(4, 8)
     .set(5, 7);

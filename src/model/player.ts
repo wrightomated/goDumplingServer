@@ -11,7 +11,11 @@ export class Player {
   playSpace: Card[] = [];
   name: string;
   isPlaying: boolean = false;
-  desserts: Card[] = [];
+  // desserts: Card[] = [];
+  puddins: number = 0;
+  pork = 0;
+  prawn = 0;
+  beef = 0;
 
   constructor(id: number, playerConnection: PlayerConnection) {
     this.id = id;

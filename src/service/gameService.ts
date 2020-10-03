@@ -1,4 +1,4 @@
-import { Card, cardToScore } from "../model/card";
+import { Card } from "../model/card";
 import { Game } from "../model/game";
 import { NumberOfPlayers, Player } from "../model/player";
 import { PlayerConnection } from "../model/playerConnection";
@@ -75,8 +75,10 @@ export class GameService {
 
   nextRound() {
     if (this.gameState.round === 3) {
-      //endgame
+      this.scoringService.scorePuddins(this.playingPlayers);
+      this.scoringService.scoreDumplings(this.playingPlayers);
       console.log("end");
+      this.gameState.gameEnded = true;
       return;
     }
     this.gameState.deck = this.deckService.shuffleArray(this.gameState.deck);
@@ -109,10 +111,16 @@ export class GameService {
     });
     if (this.playingPlayers[0].hand.length === 0) {
       console.log(JSON.stringify(this.playingPlayers));
+      this.storePuddin();
+      this.storeDumpling();
       this.score();
       this.nextRound();
     }
   }
+
+  // scoreList(): any[] {
+
+  // }
 
   offerCard(player: Player, cardId: number) {
     const card = player.hand.find((c) => c.id === cardId);
@@ -129,19 +137,25 @@ export class GameService {
 
   score() {
     this.scoringService.score(this.playingPlayers);
-    const reducer = (accumulator: number, currentValue: number) =>
-      accumulator + currentValue;
-    this.playingPlayers.forEach((p) => {
-      p.totalScore = p.playSpace
-        .map((c) => cardToScore.get(c.type))
-        .reduce(reducer, p.totalScore);
-      console.log(p.totalScore);
-    });
   }
 
   playerReady(socketId: string, name: string) {
     const player = this.playerBySocketId(socketId);
     player.playerReady = true;
     player.name = name ?? `Player ${player.id}`;
+  }
+
+  storePuddin() {
+    this.playingPlayers.forEach((p) => {
+      p.puddins += p.playSpace.filter((c) => c.type === "puddin").length;
+    });
+  }
+
+  storeDumpling() {
+    this.playingPlayers.forEach((p) => {
+      p.pork += p.playSpace.filter((c) => c.type === "pork").length;
+      p.prawn += p.playSpace.filter((c) => c.type === "prawn").length;
+      p.beef += p.playSpace.filter((c) => c.type === "beef").length;
+    });
   }
 }

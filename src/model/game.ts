@@ -9,6 +9,7 @@ export class Game {
   discardPile: Deck = [];
   players: Player[] = [];
   gameTable: Table;
+  gameEnded: boolean = false;
 }
 
 type GameRound = 0 | 1 | 2 | 3;

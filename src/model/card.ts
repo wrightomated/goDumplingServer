@@ -13,14 +13,9 @@ export type CardType =
   | "birthday"
   | "beef"
   | "pork"
-  | "greens"
   | "puddin"
-  | "beam"
-  | "prawn";
-
-export const cardToScore: Map<CardType, number> = new Map()
-  .set("champagne", 2)
-  .set("birthday", 10)
-  .set("pork", 1)
-  .set("beef", 2)
-  .set("prawn", 3);
+  | "prawn"
+  | "ice"
+  | "bowl"
+  | "chilli"
+  | "vinegar";

@@ -47,6 +47,9 @@ server.on("connection", (socket) => {
       updateHands();
       updateTable();
     }
+    if (gameService.gameState.gameEnded) {
+      server.emit("end", gameService.scoreList());
+    }
   });
   socket.on("ready", (playerName: string) => {
     console.log("yahoo");
