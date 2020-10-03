@@ -8,11 +8,11 @@ export class DeckService {
     cards: [
       {
         cardType: "birthday",
-        amount: 1,
+        amount: 100,
       },
       {
         cardType: "champagne",
-        amount: 5,
+        amount: 100,
       },
       {
         cardType: "pork",
@@ -22,11 +22,15 @@ export class DeckService {
         cardType: "beef",
         amount: 15,
       },
+      {
+        cardType: "prawn",
+        amount: 15,
+      },
     ],
   };
 
   private playerToCardMap: Map<NumberOfPlayers, number> = new Map()
-    .set(2, 2)
+    .set(2, 10)
     .set(3, 9)
     .set(4, 8)
     .set(5, 7);

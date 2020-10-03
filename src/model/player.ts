@@ -11,6 +11,7 @@ export class Player {
   playSpace: Card[] = [];
   name: string;
   isPlaying: boolean = false;
+  desserts: Card[] = [];
 
   constructor(id: number, playerConnection: PlayerConnection) {
     this.id = id;

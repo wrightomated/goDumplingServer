@@ -106,6 +106,7 @@ export class GameService {
           : heldHand;
     });
     if (this.playingPlayers[0].hand.length === 0) {
+      console.log(JSON.stringify(this.playingPlayers));
       this.score();
       this.nextRound();
     }
