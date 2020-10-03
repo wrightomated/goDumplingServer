@@ -34,15 +34,15 @@ export class GameService {
   }
 
   playerInGame(socketId: string, insecureToken: string): number {
-    const socketInUse = this.gameState?.players.find(
-      (p) => p.playerConnection.socketId === socketId
-    );
+    // const socketInUse = this.gameState.players.find(
+    //   (p) => p.playerConnection.socketId === socketId
+    // );
 
-    // I can't imagine this happening.
-    if (socketInUse) {
-      console.error("socketInUse");
-      return;
-    }
+    // // I can't imagine this happening.
+    // if (socketInUse) {
+    //   console.error("socketInUse");
+    //   return;
+    // }
 
     const playerIndex = this.gameState.players.findIndex(
       (p) => p.playerConnection.insecureToken === insecureToken
@@ -142,7 +142,7 @@ export class GameService {
   playerReady(socketId: string, name: string) {
     const player = this.playerBySocketId(socketId);
     player.playerReady = true;
-    player.name = name ?? `Player ${player.id}`;
+    player.name = name ? name : `Player ${player.id}`;
   }
 
   storePuddin() {
