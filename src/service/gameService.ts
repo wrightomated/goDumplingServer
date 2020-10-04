@@ -29,8 +29,26 @@ export class GameService {
     return this.gameState.players.filter((p) => p.isPlaying);
   }
 
+  public get endOfRound(): boolean {
+    return this.playingPlayers[0].hand.length === 0;
+  }
+
   public get currentTable(): Table {
-    return new Table(this.gameState);
+    return new Table(
+      this.gameState,
+      this.findWinner(this.gameState.gameEnded, this.playingPlayers)
+    );
+  }
+
+  findWinner(ended: boolean, players: Player[]): number[] {
+    return ended
+      ? [...this.playingPlayers]
+          .sort((a, b) => {
+            return a.totalScore - b.totalScore;
+          })
+          .filter((p, i, a) => p.totalScore === a[a.length - 1].totalScore)
+          .map((p) => p.id)
+      : [];
   }
 
   playerInGame(socketId: string, insecureToken: string): number {
@@ -53,7 +71,7 @@ export class GameService {
 
   newGame() {
     this.gameState.players.forEach((p) => {
-      p.reset();
+      // p.reset();
     });
   }
 
@@ -116,17 +134,11 @@ export class GameService {
           : heldHand;
     });
     if (this.playingPlayers[0].hand.length === 0) {
-      console.log(JSON.stringify(this.playingPlayers));
       this.storePuddin();
       this.storeDumpling();
       this.score();
-      this.nextRound();
     }
   }
-
-  // scoreList(): any[] {
-
-  // }
 
   offerCard(player: Player, cardId: number) {
     const card = player.hand.find((c) => c.id === cardId);
@@ -142,7 +154,8 @@ export class GameService {
   }
 
   score() {
-    this.scoringService.score(this.playingPlayers);
+    const scores = this.scoringService.score(this.playingPlayers);
+    this.playingPlayers.forEach((p, i) => (p.totalScore = scores[i]));
   }
 
   playerReady(socketId: string, name: string) {

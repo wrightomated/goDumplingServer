@@ -1,4 +1,3 @@
-import { isRegExp } from "util";
 import { Card } from "./card";
 import { Game } from "./game";
 
@@ -8,7 +7,7 @@ export class Table {
   deckSize: number;
   discardSize: number;
 
-  constructor(gameState: Game) {
+  constructor(gameState: Game, winnerIDs?: number[]) {
     this.round = gameState.round;
     this.deckSize = gameState.deck.length;
     this.discardSize = gameState.discardPile.length;
@@ -20,30 +19,10 @@ export class Table {
           playerName: p.name,
           playerScore: p.totalScore,
           playerPuddins: p.puddins,
-          winner: this.findWinner(gameState, p.totalScore),
+          selectedCard: p.playedThisTurn,
+          winner: winnerIDs.includes(p.id),
         };
       });
-  }
-
-  private findWinner(gameState: Game, score: number) {
-    if (gameState.gameEnded) {
-      console.log(
-        "coooool",
-        gameState.players
-          .filter((p) => p.isPlaying)
-          .sort((a, b) => {
-            return a.totalScore + b.totalScore;
-          })
-      );
-      return (
-        gameState.players
-          .filter((p) => p.isPlaying)
-          .sort((a, b) => {
-            return a.totalScore + b.totalScore;
-          })[0].totalScore === score
-      );
-    }
-    return false;
   }
 }
 
@@ -52,5 +31,6 @@ export class PlayerOverview {
   playerName: string;
   playerScore: number;
   playerPuddins: number;
+  selectedCard: boolean;
   winner?: boolean = false;
 }

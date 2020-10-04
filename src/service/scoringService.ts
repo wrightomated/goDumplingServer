@@ -6,6 +6,7 @@ export class ScoringService {
   private reducer = (accumulator: number, currentValue: number) =>
     accumulator + currentValue;
 
+  // make this a config file
   private cardToScore: Map<CardType, number> = new Map()
     .set("champagne", 0)
     .set("birthday", 0)
@@ -17,63 +18,79 @@ export class ScoringService {
     .set("chilli", 2)
     .set("vinegar", 3)
     .set("puddin", 0);
+  private vinegarDumpling = 1;
+  private chilliDumping = 2;
+  private iceLast = -5;
+  private puddingSet = 3;
+  private puddingSetScore = 6;
+  private leastPuddingScore = -12;
+  private dumplingSetScore = 4;
+  private mostPrawn = 9;
+  private mostBeef = 6;
+  private mostPork = 3;
+  private champagneMultiplier = 2;
 
-  score(players: Player[]): void {
+  score(players: Player[]): number[] {
     const champagnes = this.findChampagnes(players);
-    players.forEach((p, i) => {
-      p.totalScore += this.dumplingSet(p);
-      p.totalScore += this.bowlAndSauce(p);
-      p.totalScore += this.ice(p.playSpace);
-      p.totalScore = p.playSpace
-        .map((c, j) => this.calculateScore(c.type, champagnes[i]))
-        .reduce(this.reducer, p.totalScore);
-      console.log("SCORE", p.playSpace, p.totalScore);
+    return players.map((p, i) => {
+      let score = p.totalScore;
+      score += this.dumplingSet(p);
+      score += this.bowlAndSauce(p);
+      score += this.ice(p.playSpace);
+      score = p.playSpace
+        .map((c, j) => this.calculateScore(c.type, champagnes[j]))
+        .reduce(this.reducer, score);
+      return score;
     });
   }
 
   scorePuddins(players: Player[]) {
-    const sorted: Player[] = players.sort((a, b) => {
+    const sorted: Player[] = [...players].sort((a, b) => {
       return a.puddins - b.puddins;
     });
-    console.log(sorted);
     const lowestPudding: number = sorted[0].puddins;
-    // players.find(
-    //   (p) => p.id === sorted[sorted.length - 1].id
-    // ).totalScore += -12;
+
     players.forEach((p) => {
       if (p.puddins === lowestPudding) {
-        p.totalScore -= 12;
+        p.totalScore += this.leastPuddingScore;
       }
-      p.totalScore += Math.floor(p.puddins / 3);
+      p.totalScore +=
+        Math.floor(p.puddins / this.puddingSet) * this.puddingSetScore;
     });
   }
 
   scoreDumplings(players: Player[]) {
-    const beef: number = players.sort((a, b) => {
-      return a.beef + b.beef;
-    })[0].beef;
-    const pork: number = players.sort((a, b) => {
-      return a.pork + b.pork;
-    })[0].pork;
-    const prawn: number = players.sort((a, b) => {
-      return a.prawn + b.prawn;
-    })[0].prawn;
+    const endOfArray = players.length - 1;
+    const beef: number = [...players].sort((a, b) => {
+      return a.beef - b.beef;
+    })[endOfArray].beef;
+    const pork: number = [...players].sort((a, b) => {
+      return a.pork - b.pork;
+    })[endOfArray].pork;
+    const prawn: number = [...players].sort((a, b) => {
+      return a.prawn - b.prawn;
+    })[endOfArray].prawn;
+
     players.forEach((p) => {
       if (p.prawn === prawn) {
-        p.totalScore += 9;
+        p.totalScore += this.mostPrawn;
       }
       if (p.beef === beef) {
-        p.totalScore += 6;
+        p.totalScore += this.mostBeef;
       }
       if (p.pork === pork) {
-        p.totalScore += 3;
+        p.totalScore += this.mostPork;
       }
     });
   }
 
   calculateScore(cardType: CardType, champagnes: number): number {
     if (cardType === "champagne" && champagnes > 1) {
-      return 2 * champagnes;
+      console.log(
+        "champagne add score: ",
+        this.champagneMultiplier * champagnes
+      );
+      return this.champagneMultiplier * champagnes;
     }
     return this.cardToScore.get(cardType);
   }
@@ -99,7 +116,7 @@ export class ScoringService {
       p.playSpace.some((c) => c.type === "beef") &&
       p.playSpace.some((c) => c.type === "pork")
     ) {
-      return 4;
+      return this.dumplingSetScore;
     }
     return 0;
   }
@@ -110,8 +127,8 @@ export class ScoringService {
     if (bowlArray.length > 0) {
       const vArray = this.sliceOnCardType(bowlArray, "vinegar");
       const cArray = this.sliceOnCardType(bowlArray, "chilli");
-      temp += this.addDumplings(vArray, 1);
-      temp += this.addDumplings(cArray, 1);
+      temp += this.addDumplings(vArray, this.vinegarDumpling);
+      temp += this.addDumplings(cArray, this.chilliDumping);
     }
     return temp;
   }
@@ -133,7 +150,7 @@ export class ScoringService {
 
   ice(cards: Card[]) {
     if (cards[cards.length - 1].type === "ice") {
-      return -5;
+      return this.iceLast;
     }
     return 0;
   }

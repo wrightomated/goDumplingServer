@@ -21,18 +21,18 @@ export class Player {
     this.playerConnection = playerConnection;
   }
 
-  reset() {
-    this.hand = [];
-    this.playSpace = [];
-    this.prawn = 0;
-    this.pork = 0;
-    this.beef = 0;
-    this.puddins = 0;
-    this.isPlaying = false;
-    this.playerReady = false;
-    this.totalScore = 0;
-    this.playedThisTurn = false;
-  }
+  // reset() {
+  //   this.hand = [];
+  //   this.playSpace = [];
+  //   this.prawn = 0;
+  //   this.pork = 0;
+  //   this.beef = 0;
+  //   this.puddins = 0;
+  //   this.isPlaying = false;
+  //   this.playerReady = false;
+  //   this.totalScore = 0;
+  //   this.playedThisTurn = false;
+  // }
 }
 
 export type NumberOfPlayers = 2 | 3 | 4 | 5;

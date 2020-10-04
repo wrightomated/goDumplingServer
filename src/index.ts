@@ -6,8 +6,8 @@ import { GameService } from "./service/gameService";
 const server = io.listen(3000);
 const gameService: GameService = new GameService();
 let countDownStarted: boolean = false;
-let timeleft = 10;
-let numberOfPlayersNeeded = 5;
+let timeleft = 1;
+let numberOfPlayersNeeded = 2;
 
 // middleware
 server.use((socket, next) => {
@@ -36,10 +36,18 @@ server.on("connection", (socket) => {
     );
     gameService.offerCard(player, cardId);
     socket.emit("updateHand", player.hand);
+
     if (gameService.playingPlayers.every((p) => p.playedThisTurn)) {
       gameService.nextTurn();
       updateHands();
-      updateTable();
+    }
+    updateTable();
+    if (gameService.endOfRound) {
+      setTimeout(() => {
+        gameService.nextRound();
+        updateHands();
+        updateTable();
+      }, 1000);
     }
     if (gameService.gameState.gameEnded) {
       setTimeout(() => {
@@ -48,7 +56,6 @@ server.on("connection", (socket) => {
     }
   });
   socket.on("ready", (playerName: string) => {
-    console.log("yahoo");
     const player = gameService.playerBySocketId(socket.id);
     if (timeleft < 0 && !player.playerReady) {
       socket.emit("countdown", timeleft);
